@@ -27,10 +27,12 @@ set(LIBCAF_CORE_SRCS
   src/behavior.cpp
   src/binary_deserializer.cpp
   src/blocking_actor.cpp
+  src/complexity_based_credit_controller.cpp
   src/config_option.cpp
   src/config_option_adder.cpp
   src/config_option_set.cpp
   src/config_value.cpp
+  src/credit_controller.cpp
   src/decorator/sequencer.cpp
   src/decorator/splitter.cpp
   src/default_attachable.cpp
@@ -130,6 +132,7 @@ set(LIBCAF_CORE_SRCS
   src/string_algorithms.cpp
   src/string_view.cpp
   src/term.cpp
+  src/test_credit_controller.cpp
   src/thread_hook.cpp
   src/timestamp.cpp
   src/type_erased_tuple.cpp
