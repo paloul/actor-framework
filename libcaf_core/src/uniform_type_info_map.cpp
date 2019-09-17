@@ -18,38 +18,23 @@
 
 #include "caf/uniform_type_info_map.hpp"
 
-#include <ios> // std::ios_base::failure
-#include <array>
-#include <tuple>
-#include <limits>
-#include <string>
-#include <vector>
-#include <cstring> // memcmp
 #include <algorithm>
+#include <array>
+#include <string>
 #include <type_traits>
 
 #include "caf/abstract_group.hpp"
-#include "caf/actor_cast.hpp"
-#include "caf/actor_factory.hpp"
 #include "caf/actor_system.hpp"
 #include "caf/actor_system_config.hpp"
 #include "caf/downstream_msg.hpp"
 #include "caf/duration.hpp"
 #include "caf/group.hpp"
-#include "caf/locks.hpp"
-#include "caf/logger.hpp"
 #include "caf/message.hpp"
 #include "caf/message_builder.hpp"
-#include "caf/proxy_registry.hpp"
-#include "caf/string_algorithms.hpp"
 #include "caf/timespan.hpp"
 #include "caf/timestamp.hpp"
 #include "caf/type_nr.hpp"
 #include "caf/upstream_msg.hpp"
-
-#include "caf/detail/safe_equal.hpp"
-#include "caf/detail/scope_guard.hpp"
-#include "caf/detail/shared_spinlock.hpp"
 
 namespace caf {
 
@@ -96,7 +81,7 @@ const char* numbered_type_names[] = {
   "@weak_actor_ptr",
   "bool",
   "double",
-  "float"
+  "float",
 };
 
 namespace {
@@ -117,7 +102,7 @@ void fill_builtins(builtins& arr, List, size_t pos) {
   fill_builtins(arr, next, pos + 1);
 }
 
-} // namespace <anonymous>
+} // namespace
 
 type_erased_value_ptr uniform_type_info_map::make_value(uint16_t nr) const {
   return builtin_[nr - 1].second();
@@ -125,9 +110,7 @@ type_erased_value_ptr uniform_type_info_map::make_value(uint16_t nr) const {
 
 type_erased_value_ptr
 uniform_type_info_map::make_value(const std::string& x) const {
-  auto pred = [&](const value_factory_kvp& kvp) {
-    return kvp.first == x;
-  };
+  auto pred = [&](const value_factory_kvp& kvp) { return kvp.first == x; };
   auto e = builtin_.end();
   auto i = std::find_if(builtin_.begin(), e, pred);
   if (i != e)

@@ -18,54 +18,36 @@
 
 #pragma once
 
-#include <set>
-#include <map>
+#include <array>
+#include <functional>
 #include <string>
-#include <utility>
 #include <typeinfo>
-#include <stdexcept>
-#include <typeindex>
-#include <type_traits>
 #include <unordered_map>
+#include <utility>
 
 #include "caf/fwd.hpp"
-
-#include "caf/atom.hpp"
-#include "caf/unit.hpp"
-#include "caf/node_id.hpp"
-#include "caf/duration.hpp"
-#include "caf/system_messages.hpp"
+#include "caf/rtti_pair.hpp"
 #include "caf/type_erased_value.hpp"
-
 #include "caf/type_nr.hpp"
-#include "caf/detail/type_list.hpp"
-#include "caf/detail/shared_spinlock.hpp"
 
 namespace caf {
 
 class uniform_type_info_map {
 public:
+  // -- friends ----------------------------------------------------------------
+
   friend class actor_system;
 
-  using value_factory = std::function<type_erased_value_ptr ()>;
+  // -- member types -----------------------------------------------------------
 
-  using actor_factory_result = std::pair<strong_actor_ptr, std::set<std::string>>;
+  using value_factory = std::function<type_erased_value_ptr()>;
 
-  using actor_factory = std::function<actor_factory_result (actor_config&, message&)>;
-
-  using actor_factories = std::unordered_map<std::string, actor_factory>;
-
-  using value_factories_by_name = std::unordered_map<std::string, value_factory>;
-
-  using value_factories_by_rtti = std::unordered_map<std::type_index, value_factory>;
+  using value_factories_by_name = std::unordered_map<std::string,
+                                                     value_factory>;
 
   using value_factory_kvp = std::pair<std::string, value_factory>;
 
-  using portable_names = std::unordered_map<std::type_index, std::string>;
-
-  using error_renderer = std::function<std::string (uint8_t, atom_value, const message&)>;
-
-  using error_renderers = std::unordered_map<atom_value, error_renderer>;
+  // -- factories --------------------------------------------------------------
 
   type_erased_value_ptr make_value(uint16_t nr) const;
 
@@ -73,15 +55,23 @@ public:
 
   type_erased_value_ptr make_value(const std::type_info& x) const;
 
-  /// Returns the portable name for given type information or `nullptr`
-  /// if no mapping was found.
+  // -- properties -------------------------------------------------------------
+
+  /// Returns the portable name for given type information or
+  /// `default_type_name()` if no mapping was found.
   const std::string& portable_name(uint16_t nr, const std::type_info* ti) const;
 
-  /// Returns the portable name for given type information or `nullptr`
-  /// if no mapping was found.
-  const std::string&
-  portable_name(const std::pair<uint16_t, const std::type_info*>& x) const {
+  /// Returns the portable name for given type information or
+  /// `default_type_name()` if no mapping was found.
+  const std::string& portable_name(rtti_pair x) const {
     return portable_name(x.first, x.second);
+  }
+
+  /// Returns the portable name for `T` or `default_type_name()` if no mapping
+  /// was found.
+  template <class T>
+  const std::string& portable_name() const {
+    return portable_name(make_rtti_pair<T>());
   }
 
   /// Returns the enclosing actor system.
@@ -95,19 +85,17 @@ public:
   }
 
 private:
+  // -- constructors, destructors, and assignment operators --------------------
+
   uniform_type_info_map(actor_system& sys);
+
+  // -- member variables -------------------------------------------------------
 
   /// Reference to the parent system.
   actor_system& system_;
 
   /// Value factories for builtin types.
   std::array<value_factory_kvp, type_nrs - 1> builtin_;
-
-  /// Values factories for user-defined types.
-  value_factories_by_name ad_hoc_;
-
-  /// Lock for accessing `ad_hoc_`.`
-  mutable detail::shared_spinlock ad_hoc_mtx_;
 
   /// Names of builtin types.
   std::array<std::string, type_nrs - 1> builtin_names_;
@@ -117,4 +105,3 @@ private:
 };
 
 } // namespace caf
-
