@@ -18,24 +18,22 @@
 
 #pragma once
 
-#include <tuple>
 #include <chrono>
+#include <tuple>
 
-#include "caf/fwd.hpp"
 #include "caf/actor.hpp"
-#include "caf/message.hpp"
-#include "caf/duration.hpp"
-#include "caf/message_id.hpp"
-#include "caf/response_type.hpp"
-#include "caf/response_handle.hpp"
-#include "caf/message_priority.hpp"
 #include "caf/check_typed_input.hpp"
+#include "caf/duration.hpp"
+#include "caf/fwd.hpp"
+#include "caf/message.hpp"
+#include "caf/message_id.hpp"
+#include "caf/message_priority.hpp"
+#include "caf/policy/single_response.hpp"
+#include "caf/response_handle.hpp"
+#include "caf/response_type.hpp"
 
 namespace caf {
 namespace mixin {
-
-template <class T>
-struct is_blocking_requester : std::false_type { };
 
 /// A `requester` is an actor that supports
 /// `self->request(...).{then|await|receive}`.
@@ -59,22 +57,17 @@ public:
   /// @returns A handle identifying a future-like handle to the response.
   /// @warning The returned handle is actor specific and the response to the
   ///          sent message cannot be received by another actor.
-  template <message_priority P = message_priority::normal,
-            class Handle = actor, class... Ts>
+  template <message_priority P = message_priority::normal, class Handle = actor,
+            class... Ts>
+  // TODO: replace this monstrosity with 'auto' when switching to C++17
   response_handle<Subtype,
-                  response_type_t<
+                  policy::single_response<response_type_t<
                     typename Handle::signatures,
-                    typename detail::implicit_conversions<
-                      typename std::decay<Ts>::type
-                    >::type...>,
-                  is_blocking_requester<Subtype>::value>
+                    detail::implicit_conversions_t<detail::decay_t<Ts>>...>>>
   request(const Handle& dest, const duration& timeout, Ts&&... xs) {
+    using namespace detail;
     static_assert(sizeof...(Ts) > 0, "no message to send");
-    using token =
-      detail::type_list<
-        typename detail::implicit_conversions<
-          typename std::decay<Ts>::type
-        >::type...>;
+    using token = type_list<implicit_conversions_t<decay_t<Ts>>...>;
     static_assert(response_type_unbox<signatures_of_t<Handle>, token>::valid,
                   "receiver does not accept given message");
     auto dptr = static_cast<Subtype*>(this);
@@ -87,23 +80,25 @@ public:
       dptr->eq_impl(req_id.response_id(), dptr->ctrl(), dptr->context(),
                     make_error(sec::invalid_argument));
     }
-    return {req_id.response_id(), dptr};
-   }
+    using response_type
+      = response_type_t<typename Handle::signatures,
+                        detail::implicit_conversions_t<detail::decay_t<Ts>>...>;
+    using handle_type
+      = response_handle<Subtype, policy::single_response<response_type>>;
+    return handle_type{dptr, req_id.response_id()};
+  }
 
   /// Sends `{xs...}` as a synchronous message to `dest` with priority `mp`.
   /// @returns A handle identifying a future-like handle to the response.
   /// @warning The returned handle is actor specific and the response to the
   ///          sent message cannot be received by another actor.
-  template <message_priority P = message_priority::normal,
-            class Rep = int, class Period = std::ratio<1>,
-            class Handle = actor, class... Ts>
+  template <message_priority P = message_priority::normal, class Rep = int,
+            class Period = std::ratio<1>, class Handle = actor, class... Ts>
+  // TODO: replace this monstrosity with 'auto' when switching to C++17
   response_handle<Subtype,
-                  response_type_t<
+                  policy::single_response<response_type_t<
                     typename Handle::signatures,
-                    typename detail::implicit_conversions<
-                      typename std::decay<Ts>::type
-                    >::type...>,
-                  is_blocking_requester<Subtype>::value>
+                    detail::implicit_conversions_t<detail::decay_t<Ts>>...>>>
   request(const Handle& dest, std::chrono::duration<Rep, Period> timeout,
           Ts&&... xs) {
     return request(dest, duration{timeout}, std::forward<Ts>(xs)...);
