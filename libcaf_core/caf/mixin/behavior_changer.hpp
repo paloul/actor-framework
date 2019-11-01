@@ -21,8 +21,15 @@
 #include <type_traits>
 #include <utility>
 
+#include "caf/actor_traits.hpp"
 #include "caf/behavior_policy.hpp"
 #include "caf/fwd.hpp"
+#include "caf/local_actor.hpp"
+#include "caf/message_id.hpp"
+#include "caf/mixin/requester.hpp"
+#include "caf/mixin/sender.hpp"
+#include "caf/response_handle.hpp"
+#include "caf/typed_behavior.hpp"
 
 namespace caf {
 namespace mixin {

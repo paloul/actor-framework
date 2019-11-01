@@ -21,7 +21,9 @@
 #include "caf/actor_cast.hpp"
 #include "caf/actor_storage.hpp"
 #include "caf/actor_system.hpp"
+#include "caf/actor_traits.hpp"
 #include "caf/blocking_actor.hpp"
+#include "caf/intrusive_ptr.hpp"
 #include "caf/none.hpp"
 #include "caf/scoped_execution_unit.hpp"
 
