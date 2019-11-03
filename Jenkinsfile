@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library('caf-continuous-integration') _
+@Library('caf-continuous-integration@topic/cmake-installation') _
 
 // Default CMake flags for release builds.
 defaultReleaseBuildFlags = [
@@ -29,32 +29,29 @@ config = [
     ],
     // Our build matrix. Keys are the operating system labels and values are build configurations.
     buildMatrix: [
-        ['Linux', [
-            builds: ['debug'],
-            tools: ['gcc4.8', 'gcc4.9', 'gcc5', 'gcc6', 'gcc7'],
-        ]],
-        ['Linux', [
-            builds: ['debug'],
-            tools: ['gcc8'],
-            extraSteps: ['coverageReport'],
-        ]],
-        ['Linux', [
-            builds: ['release'],
-            tools: ['gcc8', 'clang'],
-        ]],
-        ['macOS', [
+        ['debian-8', [
             builds: ['debug', 'release'],
-            tools: ['clang'],
+            tools: ['clang-4'],
         ]],
-        ['FreeBSD', [
+        ['debian-9', [
             builds: ['debug', 'release'],
-            tools: ['clang'],
+            tools: ['gcc-6'],
         ]],
-        ['Windows', [
-            // TODO: debug build currently broken
-            //builds: ['debug', 'release'],
-            builds: ['release'],
-            tools: ['msvc'],
+        ['centos-6', [
+            builds: ['debug', 'release'],
+            tools: ['gcc-7'],
+        ]],
+        ['centos-7', [
+            builds: ['debug', 'release'],
+            tools: ['gcc-7'],
+        ]],
+        ['ubuntu-16.04', [
+            builds: ['debug', 'release'],
+            tools: ['clang-4'],
+        ]],
+        ['ubuntu-18.04', [
+            builds: ['debug', 'release'],
+            tools: ['gcc-7'],
         ]],
     ],
     // Platform-specific environment settings.
