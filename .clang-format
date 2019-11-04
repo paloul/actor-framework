@@ -38,7 +38,6 @@ MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 PenaltyBreakAssignment: 10
 PenaltyBreakBeforeFirstCallParameter: 30
-PenaltyBreakString: 50
 PenaltyReturnTypeOnItsOwnLine: 5
 PointerAlignment: Left
 ReflowComments: true
