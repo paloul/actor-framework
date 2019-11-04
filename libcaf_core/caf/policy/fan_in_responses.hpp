@@ -154,8 +154,6 @@ public:
 
   fan_in_responses(fan_in_responses&&) noexcept = default;
 
-  fan_in_responses& operator=(fan_in_responses&&) noexcept = default;
-
   template <class Self, class F, class OnError>
   void await(Self* self, F&& f, OnError&& g) const {
     auto bhvr = make_behavior(std::forward<F>(f), std::forward<OnError>(g));
